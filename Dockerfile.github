@@ -59,11 +59,19 @@ RUN sudo curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/
     bicep --help
     # Done!
 
-USER root
+USER runner
+ENV PATH="/home/runner/.azure/bin:${PATH}"
+RUN az config set extension.use_dynamic_install=yes_without_prompt && \
+    az config set bicep.check_version=False
 
+USER runner
+ENV PATH="/home/runner/.azure/bin:${PATH}"
+RUN az bicep install && \
+    bicep --help
+
+USER root
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 USER runner
-
 ENTRYPOINT ["./entrypoint.sh"]
