@@ -1,11 +1,10 @@
 FROM ghcr.io/actions/actions-runner:2.304.0
 
-USER runner
-
 RUN sudo apt update -y && \
     sudo apt upgrade -y && \
     sudo apt install -y --no-install-recommends \
     wget \
+    software-properties-common \
     curl \
     git \
     lsb-release \
@@ -31,7 +30,6 @@ RUN sudo apt update -y && \
     sudo apt install -y --no-install-recommends \
     azure-cli 
 
-USER runner
     # Fetch the latest Bicep CLI binary
 RUN sudo curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 && \
     # Mark it as executable
