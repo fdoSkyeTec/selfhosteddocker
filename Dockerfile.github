@@ -10,9 +10,7 @@ RUN apt-get update && apt-get install -y git curl jq && \
     # Install Azure CLI
     curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
     # Install Bicep
-    az bicep install \
-    # Install ContainerApp
-    az extension add --name containerapp --upgrade
+    az bicep install
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
