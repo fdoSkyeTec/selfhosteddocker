@@ -1,19 +1,14 @@
-FROM ghcr.io/actions/actions-runner:latest
+FROM ghcr.io/actions/actions-runner:2.304.0
 # for latest release, see https://github.com/actions/runner/releases
 
 USER root
 
-# install curl and jq
-RUN apt-get update && apt-get install -y wget git lsb-release gpg gnupg curl jq && \
-    wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb" && \
-    dpkg -i packages-microsoft-prod.deb && \
-    apt install -f \
-    apt update -y && \
-    apt upgrade -y && \
-    apt install -y --no-install-recommends \
-    azure-cli \
+# install curl, jq, and azure cli
+RUN apt-get update && apt-get install -y curl jq && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    # Install Azure CLI
+    curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
