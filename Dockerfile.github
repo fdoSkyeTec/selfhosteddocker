@@ -59,6 +59,8 @@ RUN sudo curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/
     bicep --help
     # Done!
 
+USER root
+
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
