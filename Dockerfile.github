@@ -1,12 +1,11 @@
-FROM ghcr.io/actions/actions-runner:latest
+FROM ghcr.io/actions/actions-runner:2.304.0
+
+USER runner
 
 RUN sudo apt update -y && \
     sudo apt upgrade -y && \
     sudo apt install -y --no-install-recommends \
     wget \
-    apt-transport-https \
-    software-properties-common \
-    ca-certificates \
     curl \
     git \
     lsb-release \
