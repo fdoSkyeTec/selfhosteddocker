@@ -1,14 +1,63 @@
-FROM ghcr.io/actions/actions-runner:2.304.0
-# for latest release, see https://github.com/actions/runner/releases
+FROM ghcr.io/actions/actions-runner:latest
 
-USER root
+RUN sudo apt update -y && \
+    sudo apt upgrade -y && \
+    sudo apt install -y --no-install-recommends \
+    wget \
+    apt-transport-https \
+    software-properties-common \
+    ca-certificates \
+    curl \
+    git \
+    lsb-release \
+    gpg \
+    gnupg
 
-# install curl and jq
-RUN apt-get update && apt-get install -y curl jq && \
-    apt-get install git && \
-    apt-get install az cli && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# gpg signatures for additional apt repos
+
+RUN sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://dl.k8s.io/apt/doc/apt-key.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list 
+
+RUN sudo apt update -y && \
+    sudo apt install -y --no-install-recommends \
+    kubectl
+
+RUN sudo wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb" && \
+    sudo dpkg -i packages-microsoft-prod.deb && \
+    sudo apt install -f
+
+RUN sudo curl -sLS https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | \
+    sudo tee /etc/apt/keyrings/microsoft.gpg > /dev/null && \
+    sudo chmod go+r /etc/apt/keyrings/microsoft.gpg
+
+RUN AZ_REPO=$(lsb_release -cs) && \
+    echo "deb [arch=`dpkg --print-architecture` signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
+    sudo tee /etc/apt/sources.list.d/azure-cli.list
+
+RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | sudo bash
+
+RUN sudo apt update -y && \
+    sudo apt upgrade -y && \
+    sudo apt install -y --no-install-recommends \
+    azure-cli \
+    powershell
+#    sudo rm -rf /var/lib/apt/lists/*
+
+RUN sudo pwsh -command "Install-Module -Name Az -Scope AllUsers -Repository PSGallery -Force" && \
+    sudo pwsh -command "Install-Module -Name Az.AlertsManagement -Scope AllUsers -Repository PSGallery -Force" && \
+    sudo pwsh -command "Install-Module -Name Az.ImageBuilder -Force -AllowClobber" && \
+    true
+
+USER runner
+    # Fetch the latest Bicep CLI binary
+RUN sudo curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 && \
+    # Mark it as executable
+    sudo chmod +x ./bicep && \
+    # Add bicep to your PATH (requires admin)
+    sudo mv ./bicep /usr/local/bin/bicep && \
+    # Verify you can now access the 'bicep' command
+    bicep --help
+    # Done!
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
