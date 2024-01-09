@@ -1,57 +1,28 @@
-FROM ghcr.io/actions/actions-runner:2.304.0
+FROM ghcr.io/actions/actions-runner:latest
+# for latest release, see https://github.com/actions/runner/releases
 
 USER root
 
-RUN apt update -y && \
-    apt upgrade -y && \
-    apt install -y --no-install-recommends \
-    wget \
-    software-properties-common \
-    curl \
-    git \
-    lsb-release \
-    gpg \
-    gnupg
-
-# gpg signatures for additional apt repos
-
-RUN wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb" && \
+# install curl and jq
+RUN apt-get update && apt-get install -y wget git lsb-release gpg gnupg curl jq && \
+    wget -q "https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb" && \
     dpkg -i packages-microsoft-prod.deb && \
-    apt install -f
-
-RUN curl -sLS https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | \
+    apt install -f \
+    curl -sLS https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | \
     tee /etc/apt/keyrings/microsoft.gpg > /dev/null && \
-    chmod go+r /etc/apt/keyrings/microsoft.gpg
-
-RUN AZ_REPO=$(lsb_release -cs) && \
+    chmod go+r /etc/apt/keyrings/microsoft.gpg \
     echo "deb [arch=`dpkg --print-architecture` signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
-    tee /etc/apt/sources.list.d/azure-cli.list
-
-RUN apt update -y && \
+    tee /etc/apt/sources.list.d/azure-cli.list \
+    apt update -y && \
     apt upgrade -y && \
     apt install -y --no-install-recommends \
-    azure-cli 
-
-USER runner
-    # Fetch the latest Bicep CLI binary
-RUN sudo curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 && \
-    # Mark it as executable
-    sudo chmod +x ./bicep && \
-    # Add bicep to your PATH (requires admin)
-    sudo mv ./bicep /usr/local/bin/bicep && \
-    # Verify you can now access the 'bicep' command
-    bicep --help
-    # Done!
-
-ENV PATH="/home/runner/.azure/bin:${PATH}"
-RUN az config set extension.use_dynamic_install=yes_without_prompt && \
-    az config set bicep.check_version=False
-
-ENV PATH="/home/runner/.azure/bin:${PATH}"
-RUN az bicep install && \
-    bicep --help
+    azure-cli \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
-RUN sudo chmod +x ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
+USER runner
 
 ENTRYPOINT ["./entrypoint.sh"]
