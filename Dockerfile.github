@@ -3,12 +3,16 @@ FROM ghcr.io/actions/actions-runner:2.304.0
 
 USER root
 
-# install curl, jq, and azure cli
+# install curl, jq, azure cli, and bicep
 RUN apt-get update && apt-get install -y curl jq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     # Install Azure CLI
-    curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+    curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
+    # Install Bicep
+    az bicep install \
+    # Install ContainerApp
+    az extension add --name containerapp --upgrade
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
