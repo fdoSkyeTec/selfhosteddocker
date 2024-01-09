@@ -3,10 +3,20 @@ FROM ghcr.io/actions/actions-runner:2.304.0
 
 USER root
 
-# install curl and jq
+# install curl, jq, azure powershell and az cli
 RUN apt-get update && apt-get install -y curl jq && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    # Install Azure CLI
+    curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
+    # Install PowerShell
+    apt-get update && \
+    apt-get install -y wget apt-transport-https software-properties-common && \
+    wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    apt-get update && \
+    add-apt-repository universe && \
+    apt-get install -y powershell
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
