@@ -27,7 +27,7 @@ FROM ghcr.io/actions/actions-runner:latest
 USER root
 
 # install curl, jq, azure cli, bicep, terraform, and powershell
-RUN apt-get update && apt-get install -y curl jq && \
+RUN apt-get update && apt-get install -y git wget curl jq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     # Install Azure CLI
