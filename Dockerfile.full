@@ -32,27 +32,3 @@ RUN chmod +x ./entrypoint.sh
 USER runner
 
 ENTRYPOINT ["./entrypoint.sh"]
-
-
-#FROM ghcr.io/actions/actions-runner:2.304.0
-## for latest release, see https://github.com/actions/runner/releases
-#
-#USER root
-#
-## install curl, jq, azure cli, and bicep
-#RUN apt-get update && apt-get install -y curl jq && \
-#    apt-get clean && \
-#    rm -rf /var/lib/apt/lists/* && \
-#    # Install Azure CLI
-#    curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
-#    # Install Bicep
-#    curl -Lo bicep https://github.com/Azure/bicep/releases/latest/download/bicep-linux-x64 && \
-#    chmod +x ./bicep && \
-#    mv ./bicep /usr/local/bin/bicep
-#
-#COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
-#RUN chmod +x ./entrypoint.sh
-#
-#USER runner
-#
-#ENTRYPOINT ["./entrypoint.sh"]
