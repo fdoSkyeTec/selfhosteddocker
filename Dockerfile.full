@@ -6,7 +6,6 @@ USER root
 # install curl, jq, azure cli, bicep, terraform, and powershell
 RUN apt-get update && apt-get install -y git wget curl jq && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
     # Install Azure CLI
     curl -sL https://aka.ms/InstallAzureCLIDeb | bash && \
     # Install Bicep
@@ -26,6 +25,8 @@ RUN pwsh -command "Install-Module -Name Az -Scope AllUsers -Repository PSGallery
     pwsh -command "Install-Module -Name Az.AlertsManagement -Scope AllUsers -Repository PSGallery -Force" && \
     pwsh -command "Install-Module -Name Az.ImageBuilder -Force -AllowClobber" && \
     true
+
+RUN rm -rf /var/lib/apt/lists/*
 
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
